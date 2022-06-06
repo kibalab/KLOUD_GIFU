@@ -1,0 +1,7 @@
+{
+  "name": "com.kloud.gifu",
+  "version": "0.1.0",
+  "displayName": "GIFU",
+  "description": "GIF Importer for Unity",
+  "type": "module"
+}
