@@ -1,7 +1,11 @@
+using System.Collections.Generic;
+
 namespace KLOUD.GIFU
 {
     public class DataStructs
     {
+        public byte[] rawData;
+        
         public class Header
         {
             public string Sighnature = "GIF"; // Always (47="G", 49="I", 46="F")
@@ -21,8 +25,7 @@ namespace KLOUD.GIFU
                 public bool GlobalColorTableFlag;
                 public byte BackgroundColor;
                 public byte PixelAspectRatio; // PixelAspectRatio == 0 ? 1:1 : 1:(PixelAspectRatio + 15)/64
-
-            }
+            } public BitField BitFields = new  BitField();
         }
 
         public class GlobalColorTable
@@ -44,7 +47,7 @@ namespace KLOUD.GIFU
                 public bool[] DisposalMethod; // 3Byte
                 public bool UserInputFlag;
                 public bool TransparentColorFlag;
-            }
+            } public BitField BitFields = new  BitField();
 
             public byte[] DelayTime; // 2Byte
             public byte TransparentColorIndex;
@@ -66,7 +69,7 @@ namespace KLOUD.GIFU
                 public bool SortFlag;
                 public bool[] ReservedForFutureUse; // 2Byte
                 public bool[] SizeOfLocalColorTable; // 3Byte
-            }
+            } public BitField BitFields = new  BitField();
         }
 
         public class LocalColorTable // Always Same GlobalColorTable
@@ -83,8 +86,8 @@ namespace KLOUD.GIFU
             public class Data
             {
                 public byte NumberOfBytesOfData;
-                public byte[] Data;
-            } public Data[] Datas;
+                public byte[] data;
+            } public List<Data> Datas = new  List<Data>();
 
             public byte BlockTerminator; // Always (00)
         }
