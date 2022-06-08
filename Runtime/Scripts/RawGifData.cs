@@ -38,26 +38,36 @@ namespace KLOUD.GIFU
 
         public void ReadHeader() // 0~5 bytes
         {
+            #region Check Sighnature
+            
             var Sighnature = true;
             for(int i = 0; i< 3; i++) Sighnature &= Data.rawData[i] == DataStructs.GIF_Header.Sighnature[i];
 
             if (!Sighnature) Debug.LogError("[GIFU] Is not GIF format");
 
-            Data.Header.Version = (GIFVersion) Data.rawData[4];
+            #endregion
+
+            Data.Header.Version = (GIFVersion) Data.rawData[4]; // Read GIF Version
         }
 
         public void ReadCanvasDescriptor() // 6~12 bytes
         {
-           Data.GlobalScreenDestriptor.CanvasWidth = BitConverter.ToUInt16(new byte[2] {DataStructs.rawData[6], DataStructs.rawData[7]});
-           Data.GlobalScreenDestriptor.CanvasHeight = BitConverter.ToUInt16(new byte[2] {DataStructs.rawData[8], DataStructs.rawData[9]});
-           var bits = new BitArray(DataStructs.rawData[10]);
-           Data.GlobalScreenDestriptor.BitFields.GlobalColorTableFlag = bits[0];
-           Data.GlobalScreenDestriptor.BitFields.ColorResolution =
-               ReadUtil.ConvertBitsToByte(ReadUtil.ConvertBoolsToBits(new bool[] {bits[0], bits[0], bits[0]}));
-           Data.GlobalScreenDestriptor.BitFields.SortFlag = bits[4];
-           Data.GlobalScreenDestriptor.BitFields.Size = ReadUtil.ConvertBitsToByte(ReadUtil.ConvertBoolsToBits(new bool[]{ bits[5], bits[6], bits[7] }));
-           Data.GlobalScreenDestriptor.BackgroundColor = DataStructs.rawData[11];
-           Data.GlobalScreenDestriptor.PixelAspectRatio = DataStructs.rawData[12];
+            #region Read Canvas Scale
+            Data.GlobalScreenDestriptor.CanvasWidth = BitConverter.ToUInt16(new byte[2] {DataStructs.rawData[6], DataStructs.rawData[7]});
+            Data.GlobalScreenDestriptor.CanvasHeight = BitConverter.ToUInt16(new byte[2] {DataStructs.rawData[8], DataStructs.rawData[9]});
+            #endregion
+
+            #region Read BitsField  
+            var bits = new BitArray(DataStructs.rawData[10]);
+            Data.GlobalScreenDestriptor.BitFields.GlobalColorTableFlag = bits[0];
+            Data.GlobalScreenDestriptor.BitFields.ColorResolution =
+                ReadUtil.ConvertBitsToByte(ReadUtil.ConvertBoolsToBits(new bool[] {bits[0], bits[0], bits[0]}));
+            Data.GlobalScreenDestriptor.BitFields.SortFlag = bits[4];
+            Data.GlobalScreenDestriptor.BitFields.Size = ReadUtil.ConvertBitsToByte(ReadUtil.ConvertBoolsToBits(new bool[]{ bits[5], bits[6], bits[7] }));  
+            #endregion
+            
+            Data.GlobalScreenDestriptor.BackgroundColor = DataStructs.rawData[11];
+            Data.GlobalScreenDestriptor.PixelAspectRatio = DataStructs.rawData[12];
         }
     }
 }
