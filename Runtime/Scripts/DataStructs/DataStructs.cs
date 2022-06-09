@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace KLOUD.GIFU
 {
@@ -11,7 +12,7 @@ namespace KLOUD.GIFU
 
     public class DataStructs
     {
-        public byte[] rawData;
+        public byte[] RawData = new byte[]{ 0x00 };
         
         public class GIF_Header
         {
@@ -37,12 +38,7 @@ namespace KLOUD.GIFU
             public byte PixelAspectRatio; // PixelAspectRatio == 0 ? 1:1 : 1:(PixelAspectRatio + 15)/64
         } public GIF_GlobalScreenDestriptor GlobalScreenDestriptor = new GIF_GlobalScreenDestriptor();
 
-        public class GIF_GlobalColorTable
-        {
-            public byte Red;
-            public byte Green;
-            public byte Blue;
-        } public GIF_GlobalColorTable GlobalColorTable = new GIF_GlobalColorTable();
+        public List<Color> GlobalColorTable = new List<Color>(); // Not Use Alpha
 
         public class GIF_ImageBlock
         {

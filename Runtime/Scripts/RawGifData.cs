@@ -18,7 +18,7 @@ namespace KLOUD.GIFU
                 Load(value);
             }
 
-            get => Data.rawData;
+            get => Data.RawData;
         }
 
         public RawGifData(byte[] data)
@@ -29,36 +29,40 @@ namespace KLOUD.GIFU
 
         public void Load(byte[] data)
         {
-            Data.rawData = data;
+            Data.RawData = data;
             
             ReadHeader();
             ReadCanvasDescriptor();
             
         }
 
+        public ulong lastReadIndex = 0;
+
         public void ReadHeader() // 0~5 bytes
         {
             #region Check Sighnature
             
             var Sighnature = true;
-            for(int i = 0; i< 3; i++) Sighnature &= Data.rawData[i] == DataStructs.GIF_Header.Sighnature[i];
+            for(int i = 0; i< 3; i++) Sighnature &= Data.RawData[i] == DataStructs.GIF_Header.Sighnature[i];
 
             if (!Sighnature) Debug.LogError("[GIFU] Is not GIF format");
 
             #endregion
 
-            Data.Header.Version = (GIFVersion) Data.rawData[4]; // Read GIF Version
+            Data.Header.Version = (GIFVersion) Data.RawData[4]; // Read GIF Version
+
+            lastReadIndex = 5;
         }
 
         public void ReadCanvasDescriptor() // 6~12 bytes
         {
             #region Read Canvas Scale
-            Data.GlobalScreenDestriptor.CanvasWidth = BitConverter.ToUInt16(new byte[2] {DataStructs.rawData[6], DataStructs.rawData[7]});
-            Data.GlobalScreenDestriptor.CanvasHeight = BitConverter.ToUInt16(new byte[2] {DataStructs.rawData[8], DataStructs.rawData[9]});
+            Data.GlobalScreenDestriptor.CanvasWidth = BitConverter.ToUInt16(new byte[2] {Data.RawData[6], Data.RawData[7]});
+            Data.GlobalScreenDestriptor.CanvasHeight = BitConverter.ToUInt16(new byte[2] {Data.RawData[8], Data.RawData[9]});
             #endregion
 
             #region Read BitsField  
-            var bits = new BitArray(DataStructs.rawData[10]);
+            var bits = new BitArray(Data.RawData[10]);
             Data.GlobalScreenDestriptor.BitFields.GlobalColorTableFlag = bits[0];
             Data.GlobalScreenDestriptor.BitFields.ColorResolution =
                 ReadUtil.ConvertBitsToByte(ReadUtil.ConvertBoolsToBits(new bool[] {bits[0], bits[0], bits[0]}));
@@ -66,8 +70,25 @@ namespace KLOUD.GIFU
             Data.GlobalScreenDestriptor.BitFields.Size = ReadUtil.ConvertBitsToByte(ReadUtil.ConvertBoolsToBits(new bool[]{ bits[5], bits[6], bits[7] }));  
             #endregion
             
-            Data.GlobalScreenDestriptor.BackgroundColor = DataStructs.rawData[11];
-            Data.GlobalScreenDestriptor.PixelAspectRatio = DataStructs.rawData[12];
+            Data.GlobalScreenDestriptor.BackgroundColor = Data.RawData[11];
+            Data.GlobalScreenDestriptor.PixelAspectRatio = Data.RawData[12];
+
+            lastReadIndex = 12;
         }
+
+        public void ReadGlobalColorTable()
+        {
+            if(!Data.GlobalScreenDestriptor.BitFields.GlobalColorTableFlag) return;
+            
+            var tableSize = Math.Pow(2, Data.GlobalScreenDestriptor.BitFields.Size + 1);
+            var tableByteSize = tableSize * 3;
+            for (var i = lastReadIndex + 1; i < tableByteSize; )
+            {
+                Data.GlobalColorTable.Add(new Color(Data.RawData[i], Data.RawData[i+1], Data.RawData[i+2]));
+                i += 3;
+            }
+        }
+        
+        
     }
 }
